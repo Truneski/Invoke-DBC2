@@ -59,7 +59,7 @@ Installation & Configuration
 ------------
 
 Installation is pretty straight forward:
-* Git clone this repository: `git clone https://github.com/Arno0x/DBC2 dbc2`
+* Git clone this repository: `git clone https://github.com/Truneski/Invoke-DBC2.git dbc2`
 * cd into the DBC2 folder: `cd dbc2`
 * Install requirements using `pip install -r requirements.txt`
 * Give the execution rights to the main script: `chmod +x dropboxC2.py`

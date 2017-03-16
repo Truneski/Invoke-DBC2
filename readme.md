@@ -55,9 +55,6 @@ Security Aspects
 DBC2 controller asks for a DropBox Accesstoken when it starts. The master key and IV need to be set manually `pollingThread.py` script found in lib.
 DBC2 performs end-to-end encryption of data using the master key with AES-128/CBC mode. Data exchanged between the agent and the controller flows through the Dropbox servers so while the transfer itself is encrypted, thanks to HTTPS, data has to be end-to-end encrypted to protect the data while at rest on the Dropbox servers.
 
-DBC2 also performs obfuscation of the stages and the modules by the use of XOR encryption, which is dumb encryption but is enough to simply obfuscate some well known and publically available piece of codes. The key used to perform XOR encryption is a SHA256 hash of the master key.
-
-
 Installation & Configuration
 ------------
 
@@ -71,6 +68,11 @@ To start the controller, simply type `./dropboxC2.py`.
 
 Configuration is done through the `config.py` file:
 * You can optionnally specify your Dropbox API access token. If you do so, the controller won't ask you for these when it starts.
+
+Agent Stage
+------------
+You first have to manually set your Dropbox accesstoken in the Dropbox class which handles the communications with Dropbox.
+You could also set a different key and iv instead of the hardcoded ones I've shipped with the script.
 
 DISCLAIMER
 ----------------

